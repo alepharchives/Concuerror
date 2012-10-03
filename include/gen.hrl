@@ -16,6 +16,12 @@
 %%% Definitions
 %%%----------------------------------------------------------------------
 
+%% These were previously defined in the Makefile
+%% Moved here because I'm too lazy to fix flymake to find them
+-define(APP_STRING, "Concuerror").
+-define(VSN, "0.9").
+
+
 %% Application name (atom and string).
 -define(APP_ATOM, list_to_atom(?APP_STRING)).
 

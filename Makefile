@@ -16,8 +16,6 @@
 ### Application info
 ###----------------------------------------------------------------------
 
-APP_STRING = "Concuerror"
-VSN = "0.9"
 
 ###----------------------------------------------------------------------
 ### Orientation information
@@ -155,7 +153,7 @@ utest_target:   $(UTEST_MODULES:%=$(EBIN)/%.beam)
 scripts_target: concuerror
 
 utest: all
-	erl -noinput -sname $(APP_STRING) -pa $(EBIN) -s util test -s init stop
+	erl -noinput -sname concuerror -pa $(EBIN) -s util test -s init stop
 
 test: all
 	@(cd testsuite && ./runtests.sh)
@@ -166,19 +164,19 @@ concuerror:
 	\n\
 	trap ctrl_c INT\n\
 	function ctrl_c() {\n\
-	    erl -sname $(APP_STRING)_Stop -noinput \\\\\n\
+	    erl -sname concuerror_Stop -noinput \\\\\n\
 	        -pa $(EBIN) \\\\\n\
 	        -s concuerror stop -s init stop\n\
 	}\n\
 	\n\
-	erl +Bi -smp enable -noinput -sname $(APP_STRING) \\\\\n\
+	erl +Bi -smp enable -noinput -sname concuerror \\\\\n\
 	    -pa $(EBIN) \\\\\n\
 	    -s concuerror cli -s init stop -- \"\$$@\" &\n\
 	wait \$$!\n" ! > $@
 	chmod +x $@
 
 $(EBIN)/%.beam: %.erl
-	erlc $(ERL_COMPILE_FLAGS) -I $(INCLUDE) -DEBIN="\"$(EBIN)\"" -DAPP_STRING="\"$(APP_STRING)\"" -DVSN="\"$(VSN)\"" -o $(EBIN) $<
+	erlc $(ERL_COMPILE_FLAGS) -I $(INCLUDE) -DEBIN="\"$(EBIN)\"" -o $(EBIN) $<
 
 ###----------------------------------------------------------------------
 ### Dependencies
