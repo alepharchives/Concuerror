@@ -14,7 +14,7 @@
 -module(concuerror).
 
 %% UI exports.
--export([gui/1, cli/0, analyze/1, export/2, stop/0]).
+-export([cli/0, analyze/1, export/2, stop/0]).
 %% Log server callback exports.
 -export([init/1, terminate/2, handle_event/2]).
 
@@ -62,7 +62,6 @@
     | {'noprogress'}
     | {'quiet'}
     | {'preb',    sched:bound()}
-    | {'gui'}
     | {'help'}.
 
 -type options() :: [option()].
@@ -94,14 +93,6 @@ stop() ->
             stop()
     end.
 
-%% @spec gui(options()) -> 'true'
-%% @doc: Start the CED GUI.
--spec gui(options()) -> 'true'.
-gui(Options) ->
-    %% Disable error logging messages.
-    ?tty(),
-    gui:start(Options).
-
 %% @spec cli() -> 'true'
 %% @doc: Parse the command line arguments and start Concuerror.
 -spec cli() -> 'true'.
@@ -125,36 +116,34 @@ cli() ->
 cliAux(Options) ->
     %% Start the log manager.
     _ = log:start(),
-    case lists:keyfind('gui', 1, Options) of
-        {'gui'} -> gui(Options);
-        false ->
-            %% Attach the event handler below.
-            case lists:keyfind('quiet', 1, Options) of
-                false ->
-                    _ = log:attach(?MODULE, Options),
-                    ok;
-                {'quiet'} -> ok
-            end,
-            %% Run analysis
-            case analyzeAux(Options) of
-                {'error', 'arguments', Msg1} ->
-                    io:format("~s: ~s\n", [?APP_STRING, Msg1]);
-                Result ->
-                    %% Set output file
-                    Output =
-                        case lists:keyfind(output, 1, Options) of
-                            {output, O} -> O;
-                            false -> ?EXPORT_FILE
-                        end,
-                    log:log("Writing output to file ~s..", [Output]),
-                    case export(Result, Output) of
-                        {'error', Msg2} ->
-                            log:log("~s\n", [file:format_error(Msg2)]);
-                        ok ->
-                            log:log("done\n")
-                    end
-            end
+
+    %% Attach the event handler below.
+    case lists:keyfind('quiet', 1, Options) of
+    false ->
+        _ = log:attach(?MODULE, Options),
+        ok;
+    {'quiet'} -> ok
     end,
+    %% Run analysis
+    case analyzeAux(Options) of
+    {'error', 'arguments', Msg1} ->
+        io:format("~s: ~s\n", [?APP_STRING, Msg1]);
+    Result ->
+        %% Set output file
+        Output =
+            case lists:keyfind(output, 1, Options) of
+            {output, O} -> O;
+            false -> ?EXPORT_FILE
+            end,
+        log:log("Writing output to file ~s..", [Output]),
+        case export(Result, Output) of
+        {'error', Msg2} ->
+            log:log("~s\n", [file:format_error(Msg2)]);
+        ok ->
+            log:log("done\n")
+        end
+    end,
+
     %% Stop event handler
     log:stop(),
     'true'.
@@ -278,15 +267,6 @@ parse([{Opt, Param} | Args], Options) ->
                 _Other -> wrongArgument('number', Opt)
             end;
 
-        "-gui" ->
-            case Param of
-                [] ->
-                    NewOptions = lists:keystore(gui, 1,
-                        Options, {gui}),
-                    parse(Args, NewOptions);
-                _Other -> wrongArgument('number', Opt)
-            end;
-
         "-help" ->
             help(),
             erlang:halt();
@@ -349,13 +329,11 @@ help() ->
      "  -D          name=value  Define a macro\n"
      "  --noprogress            Disable progress bar\n"
      "  -q|--quiet              Disable logging (implies --noprogress)\n"
-     "  --gui                   Run concuerror with graphics\n"
      "  --help                  Show this help message\n"
      "\n"
      "Examples:\n"
      "  concuerror -DVSN=\\\"1.0\\\" --target foo bar arg1 arg2 "
-        "--files \"foo.erl\" -o out.txt\n"
-     "  concuerror --gui -I./include --files foo.erl --preb inf\n\n").
+        "--files \"foo.erl\" -o out.txt\n").
 
 
 %%%----------------------------------------------------------------------

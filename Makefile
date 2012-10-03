@@ -64,7 +64,6 @@ MAIN_MODULES = \
 	concuerror
 
 CORE_MODULES = \
-	gui \
 	error \
 	instr \
 	lid \
