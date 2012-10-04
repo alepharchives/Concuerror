@@ -14,10 +14,10 @@
 
 -module(exit).
 -export([scenarios/0]).
--export([test1/0, test2/0]).
+-export([test1/0, test2/0, test3/0]).
 
 scenarios() ->
-    [{test1, inf}, {test2, inf}].
+    [{test1, inf}, {test2, inf}, {test3, inf}].
 
 %% Right now we do not handle `exit/2' at all.
 
