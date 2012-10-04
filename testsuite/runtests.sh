@@ -23,10 +23,8 @@ fi
 # For every test do
 for test in "${tests[@]}"; do
     unset files
-    unset temp
-    temp=(`echo $test | sed -e 's/suites\/\(\w\+\)\/src\/\(\w\+\)\(\.erl\)\?/\1 \2/'`)
-    suite="${temp[0]}"
-    name="${temp[1]}"
+    suite=(`echo $test | sed 's/\(.*\)\/.*/\1/'`)
+    name=(`echo $test | sed 's/.*\///'`)
     if [ -d $test ]; then
         # Our test is a multi module directory
         dir=$test
@@ -47,7 +45,7 @@ for test in "${tests[@]}"; do
     while read line; do
         # Get function and preemption bound
         unset temp
-        temp=(`echo $line | sed -e 's/{\w\+,\(\w\+\),\(\w\+\)}/\1 \2/'`)
+        temp=(`echo $line | sed 's/{\(.*\),\(.*\),\(.*\)}/\2 \3/'`)
         fun="${temp[0]}"
         preb="${temp[1]}"
         printf "Running test %s-%s (%s, %s).." $suite $name $fun $preb
