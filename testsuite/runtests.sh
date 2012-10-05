@@ -23,8 +23,9 @@ fi
 # For every test do
 for test in "${tests[@]}"; do
     unset files
-    suite=(`echo $test | sed 's/\(.*\)\/.*/\1/'`)
-    name=(`echo $test | sed 's/.*\///'`)
+    temp=(`echo $test | sed 's%suites/\(.*\)/src/\([^/]*\).erl*%\1 \2%'`)
+    suite="${temp[0]}"
+    name="${temp[1]}"
     if [ -d $test ]; then
         # Our test is a multi module directory
         dir=$test
@@ -33,6 +34,7 @@ for test in "${tests[@]}"; do
     else
         # Our test is a single module file
         dir=${test%/*}
+        echo $dir
         mod=$name
         files=$test
     fi
@@ -50,6 +52,7 @@ for test in "${tests[@]}"; do
         preb="${temp[1]}"
         printf "Running test %s-%s (%s, %s).." $suite $name $fun $preb
         # And run concuerror
+        echo $mod and $fun and $preb
         $concuerror --target $mod $fun --files "${files[@]}" \
             --output $results/$suite/$name-$fun-$preb.txt \
             --preb $preb --quiet
