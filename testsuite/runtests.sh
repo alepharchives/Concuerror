@@ -23,7 +23,7 @@ fi
 # For every test do
 for test in "${tests[@]}"; do
     unset files
-    temp=(`echo $test | sed 's%suites/\(.*\)/src/\([^/]*\).erl*%\1 \2%'`)
+    temp=(`echo $test | sed 's%suites/\(.*\)/src/\(.[^.]*\)\(.erl\)*%\1 \2%'`)
     suite="${temp[0]}"
     name="${temp[1]}"
     if [ -d $test ]; then
