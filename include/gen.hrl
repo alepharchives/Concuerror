@@ -21,6 +21,7 @@
 -define(APP_STRING, "Concuerror").
 -define(VSN, "0.9").
 
+-define(REP_ETS_FUN(FunSpec, Args), apply_ets_mod_fun(FunSpec, Args)).
 
 %% Application name (atom and string).
 -define(APP_ATOM, list_to_atom(?APP_STRING)).

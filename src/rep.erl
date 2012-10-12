@@ -496,54 +496,34 @@ rep_whereis(RegName) ->
 %%%----------------------------------------------------------------------
 %% FIXME: A lot of repeated code here.
 rep_ets_insert_new(Tab, Obj) ->
-    Ret = ets:insert_new(Tab, Obj),
-    sched:notify(ets_insert_new, {Tab, Obj}),
-    Ret.
+    ?REP_ETS_FUN(process_info(self(), current_function),[Tab, Obj]).
 
 rep_ets_lookup(Tab, Key) ->
-    Ret = ets:lookup(Tab, Key),
-    sched:notify(ets_lookup, {Tab, Key}),
-    Ret.
+    ?REP_ETS_FUN(process_info(self(), current_function),[Tab, Key]).
 
 rep_ets_select_delete(Tab, MatchSpec) ->
-    Ret = ets:select_delete(Tab, MatchSpec),
-    sched:notify(ets_select_delete, {Tab, MatchSpec}),
-    Ret.
+    ?REP_ETS_FUN(process_info(self(), current_function),[Tab, MatchSpec]).
 
 rep_ets_insert(Tab, Obj) ->
-    Ret = ets:insert(Tab, Obj),
-    sched:notify(ets_insert, {Tab, Obj}),
-    Ret.
+    ?REP_ETS_FUN(process_info(self(), current_function),[Tab, Obj]).
 
 rep_ets_delete(Tab) ->
-    Ret = ets:delete(Tab),
-    sched:notify(ets_delete, Tab),
-    Ret.
+    ?REP_ETS_FUN(process_info(self(), current_function),[Tab]).
 
 rep_ets_delete(Tab, Key) ->
-    Ret = ets:delete(Tab, Key),
-    sched:notify(ets_delete, {Tab, Key}),
-    Ret.
+    ?REP_ETS_FUN(process_info(self(), current_function),[Tab, Key]).
 
 rep_ets_match_object(Continuation) ->
-    Ret = ets:match_object(Continuation),
-    sched:notify(ets_match_object, {Continuation}),
-    Ret.
+    ?REP_ETS_FUN(process_info(self(), current_function),[Continuation]).
 
 rep_ets_match_object(Tab, Pattern, Limit) ->
-    Ret = ets:match_object(Tab, Pattern, Limit),
-    sched:notify(ets_match_object, {Tab, Pattern, Limit}),
-    Ret.
+    ?REP_ETS_FUN(process_info(self(), current_function),[Tab, Pattern, Limit]).
 
 rep_ets_match_delete(Tab, Pattern) ->
-    Ret = ets:match_delete(Tab, Pattern),
-    sched:notify(ets_match_delete, {Tab, Pattern}),
-    Ret.
+    ?REP_ETS_FUN(process_info(self(), current_function),[Tab, Pattern]).
 
 rep_ets_foldl(Function, Acc0, Tab) ->
-    Ret = ets:foldl(Function, Acc0, Tab),
-    sched:notify(ets_foldl, {Function, Acc0, Tab}),
-    Ret.
+    ?REP_ETS_FUN(process_info(self(), current_function),[Function, Acc0, Tab]).
 
 %%%----------------------------------------------------------------------
 %%% Helper functions
@@ -553,3 +533,11 @@ find_pid(Pid) when is_pid(Pid) ->
     Pid;
 find_pid(Atom) when is_atom(Atom) ->
     whereis(Atom).
+
+
+apply_ets_mod_fun({_, {_M, F, _A}}, Args) ->
+    [_, Mod | Rest] = string:tokens(atom_to_list(F), "_"),
+    Fun = string:join(Rest,"_"),
+    Ret = apply(list_to_atom(Mod), list_to_atom(Fun), Args),
+    sched:notify(list_to_atom(string:join([Mod, Fun],"_")), list_to_tuple(Args)),
+    Ret.
